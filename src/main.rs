@@ -9,10 +9,10 @@ use std::collections::HashMap;
 use rocket_contrib::json::{Json, JsonValue};
 use rocket::request::Form;
 use rocket::response::NamedFile;
-use rocket::http::Method; // 1.
+use rocket::http::Method; 
 use rocket_cors::{
-    AllowedHeaders, AllowedOrigins, Error, // 2.
-    Cors, CorsOptions // 3.
+    AllowedHeaders, AllowedOrigins, Error,
+    Cors, CorsOptions 
 };
 use rocket::State;
 
@@ -22,22 +22,22 @@ use mongodb::{
     sync::{Client, Collection},
 };
 
+const Book:&str = "book";
  
 fn make_cors() -> Cors {
-    let allowed_origins = AllowedOrigins::some_exact(&[ // 4.      
+    let allowed_origins = AllowedOrigins::some_exact(&[     
         "http://localhost:8000",
         "http://localhost:8080",
-        "http://0.0.0.0:8000",        
-        // "chrome-extension://fhbjgbiflinjbdggehcddcbncdddomop",               
+        "http://0.0.0.0:8000",                    
     ]);
 
-    CorsOptions { // 5.
+    CorsOptions { 
         allowed_origins,
-        allowed_methods: vec![Method::Get,Method::Post].into_iter().map(From::from).collect(), // 1.
+        allowed_methods: vec![Method::Get,Method::Post].into_iter().map(From::from).collect(), 
         allowed_headers: AllowedHeaders::some(&[
             "Authorization",
             "Accept",
-            "Access-Control-Allow-Origin", // 6.
+            "Access-Control-Allow-Origin", 
         ]),
         allow_credentials: true,
         ..Default::default()
@@ -46,10 +46,11 @@ fn make_cors() -> Cors {
     .expect("error while building CORS")
 }
 
-fn mongo_conection()->Result<Collection,mongodb::error::Error>{
+
+fn mongo_conection(collection:&str)->Result<Collection,mongodb::error::Error>{
     let client = Client::with_uri_str("mongodb://localhost:27017")?;
     let database = client.database("mydb");
-    let collection = database.collection("books");
+    let collection = database.collection(collection);
     Ok(collection)
 }
 
@@ -73,7 +74,7 @@ fn mongoPost(user_input: Form<Message>){
        "title": &user_input.title,
        "author": &user_input.author
    };
-    match mongo_conection() {
+    match mongo_conection(&Book) {
         Ok(col) => col.insert_one(doc.clone(), None),
         Err(e) => Err(e.into()),
     };
@@ -85,7 +86,7 @@ fn mongoGet() ->JsonValue{
     let mut a :String  = String::from("");
     let mut book_vec :Vec<Message> = Vec::new();
 
-    match mongo_conection() {
+    match mongo_conection(&Book) {
         Ok(coll) => {
             let mut cursor = coll.find(None, None).unwrap();
             for result in cursor{
