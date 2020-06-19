@@ -2109,6 +2109,7 @@ dependencies = [
  "dotenv",
  "lazy_static",
  "mongodb",
+ "rand 0.7.3",
  "reqwest",
  "rocket",
  "rocket_contrib",

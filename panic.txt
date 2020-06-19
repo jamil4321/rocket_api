@@ -1,0 +1,14 @@
+Configured for development.
+    => address: localhost
+    => port: 8000
+    => log: normal
+    => workers: 8
+    => secret key: generated
+    => limits: forms = 32KiB
+    => keep-alive: 5s
+    => tls: disabled
+Mounting /:
+    => GET / (index)
+    => POST /add (mongoPost)
+    => GET /get (mongoGet)
+    => DELETE /delete/<id> (mongoDelete)
