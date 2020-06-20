@@ -23,9 +23,10 @@ const Book:&str = "book";
  
 fn make_cors() -> Cors {
     let allowed_origins = AllowedOrigins::some_exact(&[     
-        "http://localhost:5500",
+        "http://localhost:3000",
         "http://localhost:8080",
-        "http://0.0.0.0:8000",                
+        "http://0.0.0.0:8000",
+        "http://0.0.0.0:3000",                
     ]);
 
     CorsOptions { 
@@ -66,7 +67,7 @@ impl Message{
         }
     }
 }
-#[post("/add", data="<user_input>")]
+#[post("/", data="<user_input>")]
 fn mongoPost(user_input: Form<Message>)->Result<String,mongodb::error::Error>{
     println!("{:?}",user_input);
 
@@ -118,7 +119,7 @@ fn mongoGet() ->JsonValue{
     json!(book_vec)
 }
 
-#[delete("/delete/<id>")]
+#[delete("/<id>")]
 fn mongoDelete(id:i64)->Result<String,mongodb::error::Error>{
     println!("{}",id);
     match mongo_conection(&Book) {
