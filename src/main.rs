@@ -31,11 +31,17 @@ fn make_cors() -> Cors {
 
     CorsOptions { 
         allowed_origins,
-        allowed_methods: vec![Method::Get,Method::Post,Method::Delete].into_iter().map(From::from).collect(), 
+        allowed_methods: vec![Method::Get,Method::Post,Method::Delete,Method::Put].into_iter().map(From::from).collect(), 
         allowed_headers: AllowedHeaders::some(&[
             "Authorization",
             "Accept",
-            "Access-Control-Allow-Origin", 
+            "Access-Control-Allow-Origin",
+            "Access-Control-Allow-Headers", 
+            "Access-Control-*",
+            "Origin", 
+            "X-Requested-With", 
+            "Content-Type", 
+            "Accept"
         ]),
         allow_credentials: true,
         ..Default::default()
@@ -67,8 +73,8 @@ impl Message{
         }
     }
 }
-#[post("/", data="<user_input>")]
-fn mongoPost(user_input: Form<Message>)->Result<String,mongodb::error::Error>{
+#[post("/",format="application/json", data="<user_input>")]
+fn mongoPost(user_input: Json<Message>)->Result<Json<Message>,mongodb::error::Error>{
     println!("{:?}",user_input);
 
    let doc = doc!{
@@ -79,9 +85,8 @@ fn mongoPost(user_input: Form<Message>)->Result<String,mongodb::error::Error>{
     match mongo_conection(&Book) {
         Ok(col) => {
             col.insert_one(doc.clone(), None);
-            let string = format!("inserted{}",doc);
-            Ok(string)
-        },
+            Ok(user_input)
+        }
         Err(e) => Err(e.into()),
     }
     
@@ -135,8 +140,7 @@ fn mongoDelete(id:i64)->Result<String,mongodb::error::Error>{
 
 
 #[put("/<id>",format="application/json", data ="<user_input>")]
-fn mongoPut(id:i64,user_input:Form<Message>) ->Result<String,mongodb::error::Error> {
-        let new_id = id;
+fn mongoPut(id:i64,user_input:Json<Message>) ->Result<Json<Message>,mongodb::error::Error> {
         let new_data = doc!{
             "id":&user_input.id,
             "title": &user_input.title,
@@ -145,12 +149,10 @@ fn mongoPut(id:i64,user_input:Form<Message>) ->Result<String,mongodb::error::Err
     match mongo_conection(&Book) {
         Ok(col) => {
             col.replace_one(doc!("id":id),new_data ,None);
-            let string = format!("inserted{:#?}",user_input.clone());
-            Ok(string)
+            Ok(user_input)
         },
         Err(e) => Err(e.into()),
     }
-    // json!(book_vec)
 }
 
 fn main() {
