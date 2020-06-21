@@ -1,1 +1,1 @@
-web: target/release/$APP
+web: target/release/rocket_api
