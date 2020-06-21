@@ -1,7 +1,3 @@
-
-
-
-
 1. Heroku Installation
 First of all, Make a account on Heroku
 For deployment of Application, I will recommend Heroku CLI
