@@ -30,7 +30,7 @@ Example:
 myname@mycomp:~/Documents/myrepo$
 Now write this command,
 
-heroku create https://github.com/jamil4321/rocket_api \
+heroku create https://github.com/jamil4321/rocketapi \
   --buildpack https://github.com/emk/heroku-buildpack-rust.git
 Now, make these four files namely : Procfile, rust-toolchain, RustConfig, .travis.yml
 Procfile
