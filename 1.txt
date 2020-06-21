@@ -1,0 +1,2 @@
+heroku create https://github.com/jamil4321/rocket_api \
+  --buildpack https://github.com/emk/heroku-buildpack-rust.git
