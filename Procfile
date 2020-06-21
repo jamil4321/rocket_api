@@ -1,1 +1,1 @@
-web:ROCKET_PORT=80 target/release/rocket_api
+web:ROCKET_PORT=$PORT target/release/rocket_api
