@@ -1,1 +1,1 @@
-web:target/release/rocket_api
+web: target/release/rocket_api
