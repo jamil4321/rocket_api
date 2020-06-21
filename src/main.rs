@@ -26,7 +26,7 @@ fn make_cors() -> Cors {
         "http://localhost:3000",
         "http://localhost:8080",
         "http://0.0.0.0:8000",
-        "http://0.0.0.0:3000",                
+        "http://mongor3-app.surge.sh",                
     ]);
 
     CorsOptions { 
@@ -52,7 +52,8 @@ fn make_cors() -> Cors {
 
 
 fn mongo_conection(collection:&str)->Result<Collection,mongodb::error::Error>{
-    let client = Client::with_uri_str("mongodb://localhost:27017")?;
+    // let client = Client::with_uri_str("mongodb://localhost:27017")?;
+    let client = Client::with_uri_str("mongodb+srv://monodbUser:abc@myfisrtlerningapp-zbcua.mongodb.net/<dbname>?retryWrites=true&w=majority")?;
     let database = client.database("mydb");
     let collection = database.collection(collection);
     Ok(collection)
