@@ -4,22 +4,22 @@
 #[macro_use] extern crate rocket_contrib;
 extern crate rocket_cors;
 use rocket_contrib::json::{Json, JsonValue};
-use rocket::request::Form;
-use rocket::response::NamedFile;
 use rocket::http::Method; 
 use rocket_cors::{
-    AllowedHeaders, AllowedOrigins, Error,
+    AllowedHeaders, AllowedOrigins,
     Cors, CorsOptions 
 };
-use rand::random;
 use mongodb::{
-    
-    bson::{self,doc, Bson, document::Document},
-    sync::{Client, Collection},
-    results::InsertOneResult
+    bson::{doc, Bson},
+    sync::{Client, Collection}
 };
 
-const Book:&str = "book";
+
+
+
+const BOOK:&str = "book";
+
+
  
 fn make_cors() -> Cors {
     let allowed_origins = AllowedOrigins::some_exact(&[     
@@ -58,49 +58,33 @@ fn mongo_conection(collection:&str)->Result<Collection,mongodb::error::Error>{
     Ok(collection)
 }
 
-#[derive(Debug,FromForm, Clone, Serialize, Deserialize)]
-struct Message {
+#[derive(Debug,Clone,Serialize,Deserialize)]
+struct Book_Shop {
     id:i64,
     title: String,
     author:String
 }
-impl Message{
-    fn new(id:i64,t:String,a:String)->Message{
-        Message{
-            id:id,
-            title:t,
-            author:a
-        }
-    }
-}
-#[post("/",format="application/json", data="<user_input>")]
-fn mongoPost(user_input: Json<Message>)->Result<Json<Message>,mongodb::error::Error>{
-    println!("{:?}",user_input);
 
-   let doc = doc!{
-       "id":&user_input.id,
-       "title": &user_input.title,
-       "author": &user_input.author
-   };
-    match mongo_conection(&Book) {
-        Ok(col) => {
-            col.insert_one(doc.clone(), None);
-            Ok(user_input)
+impl Book_Shop{
+    fn new(id:i64,title:String,author:String)->Book_Shop{
+        Book_Shop{
+            id,
+            title,
+            author
         }
-        Err(e) => Err(e.into()),
     }
-    
 }
+
 #[get("/")]
-fn mongoGet() ->JsonValue{
+fn mongo_get() ->JsonValue{
     let mut i : i64 = 0;
     let mut t : String = String::from("");
     let mut a :String  = String::from("");
-    let mut book_vec :Vec<Message> = Vec::new();
+    let mut book_vec :Vec<Book_Shop> = Vec::new();
 
-    match mongo_conection(&Book) {
+    match mongo_conection(&BOOK) {
         Ok(coll) => {
-            let mut cursor = coll.find(None, None).unwrap();
+            let cursor = coll.find(None, None).unwrap();
             for result in cursor{
                 if let Ok(item) = result {
                     if let Some(&Bson::Int64(id)) = item.get("id") {
@@ -112,7 +96,7 @@ fn mongoGet() ->JsonValue{
                     if let Some(&Bson::String(ref author)) = item.get("author") {
                         a = format!("{}",author);
                     }
-                    let book_info = Message::new(i,t.clone(),a.clone());
+                    let book_info = Book_Shop::new(i,t.clone(),a.clone());
                     book_vec.push(book_info)
 
                 }
@@ -124,31 +108,49 @@ fn mongoGet() ->JsonValue{
     json!(book_vec)
 }
 
-#[delete("/<id>")]
-fn mongoDelete(id:i64)->Result<String,mongodb::error::Error>{
-    println!("{}",id);
-    match mongo_conection(&Book) {
+
+#[post("/",format="application/json", data="<user_input>")]
+fn mongo_post(user_input: Json<Book_Shop>)->Result<Json<Book_Shop>,mongodb::error::Error>{
+    println!("{:?}",user_input);
+
+   let doc = doc!{
+       "id":&user_input.id,
+       "title": &user_input.title,
+       "author": &user_input.author
+   };
+    match mongo_conection(&BOOK) {
         Ok(col) => {
-            col.delete_one(doc!("id":id), None);
-            let string = format!("deleted {}",id);
-            Ok(string)
+            col.insert_one(doc.clone(), None).err();
+            Ok(user_input)
+        }
+        Err(e) => Err(e.into()),
+    }
+    
+}
+
+#[delete("/<id>")]
+fn mongo_delete(id:i64)->Result<JsonValue,mongodb::error::Error>{
+    println!("{}",id);
+    match mongo_conection(&BOOK) {
+        Ok(col) => {
+            col.delete_one(doc!("id":id), None).err();
+            Ok(json!({"Success": true}))
         },
         Err(e) => Err(e.into()),
     }
     
 }
 
-
 #[put("/<id>",format="application/json", data ="<user_input>")]
-fn mongoPut(id:i64,user_input:Json<Message>) ->Result<Json<Message>,mongodb::error::Error> {
+fn mongo_put(id:i64,user_input:Json<Book_Shop>) ->Result<Json<Book_Shop>,mongodb::error::Error> {
         let new_data = doc!{
             "id":&user_input.id,
             "title": &user_input.title,
             "author": &user_input.author
         };
-    match mongo_conection(&Book) {
+    match mongo_conection(&BOOK) {
         Ok(col) => {
-            col.replace_one(doc!("id":id),new_data ,None);
+            col.replace_one(doc!("id":id),new_data ,None).err();
             Ok(user_input)
         },
         Err(e) => Err(e.into()),
@@ -161,5 +163,5 @@ fn main() {
 
 fn rocket()-> rocket::Rocket{
     rocket::ignite()
-    .mount("/", routes![mongoPost,mongoGet,mongoDelete,mongoPut]).attach(make_cors())
+    .mount("/", routes![mongo_get,mongo_post,mongo_delete,mongo_put]).attach(make_cors())
 }
