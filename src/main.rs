@@ -3,6 +3,7 @@
 #[macro_use] extern crate serde_derive;
 #[macro_use] extern crate rocket_contrib;
 extern crate rocket_cors;
+use rocket::response::content::Html;
 use rocket_contrib::json::{Json, JsonValue};
 use rocket::http::Method; 
 use rocket_cors::{
@@ -76,7 +77,7 @@ impl Book_Shop{
     }
 }
 
-#[get("/")]
+#[get("/api")]
 fn mongo_get() ->JsonValue{
     let mut i : i64 = 0;
     let mut t : String = String::from("");
@@ -110,7 +111,7 @@ fn mongo_get() ->JsonValue{
 }
 
 
-#[post("/",format="application/json", data="<user_input>")]
+#[post("/api",format="application/json", data="<user_input>")]
 fn mongo_post(user_input: Json<Book_Shop>)->Result<Json<Book_Shop>,mongodb::error::Error>{
     println!("{:?}",user_input);
 
@@ -129,7 +130,7 @@ fn mongo_post(user_input: Json<Book_Shop>)->Result<Json<Book_Shop>,mongodb::erro
     
 }
 
-#[delete("/<id>")]
+#[delete("/api/<id>")]
 fn mongo_delete(id:i64)->Result<JsonValue,mongodb::error::Error>{
     println!("{}",id);
     match mongo_conection(&BOOK) {
@@ -142,7 +143,7 @@ fn mongo_delete(id:i64)->Result<JsonValue,mongodb::error::Error>{
     
 }
 
-#[put("/<id>",format="application/json", data ="<user_input>")]
+#[put("/api/<id>",format="application/json", data ="<user_input>")]
 fn mongo_put(id:i64,user_input:Json<Book_Shop>) ->Result<Json<Book_Shop>,mongodb::error::Error> {
         let new_data = doc!{
             "id":&user_input.id,
@@ -158,11 +159,21 @@ fn mongo_put(id:i64,user_input:Json<Book_Shop>) ->Result<Json<Book_Shop>,mongodb
     }
 }
 
+#[get("/")]
+fn index() ->Html<String>{
+    let html = format!("
+    
+    <h1>Hello Mongo</h1>
+
+
+    ");
+    Html(html)
+}
 fn main() {
     rocket().launch();
 }
 
 fn rocket()-> rocket::Rocket{
     rocket::ignite()
-    .mount("/", routes![mongo_get,mongo_post,mongo_delete,mongo_put]).attach(make_cors())
+    .mount("/", routes![index,mongo_get,mongo_post,mongo_delete,mongo_put]).attach(make_cors())
 }
