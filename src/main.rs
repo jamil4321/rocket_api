@@ -77,7 +77,7 @@ impl Book_Shop{
     }
 }
 
-#[get("/api")]
+#[get("/")]
 fn mongo_get() ->JsonValue{
     let mut i : i64 = 0;
     let mut t : String = String::from("");
@@ -111,7 +111,7 @@ fn mongo_get() ->JsonValue{
 }
 
 
-#[post("/api",format="application/json", data="<user_input>")]
+#[post("/",format="application/json", data="<user_input>")]
 fn mongo_post(user_input: Json<Book_Shop>)->Result<Json<Book_Shop>,mongodb::error::Error>{
     println!("{:?}",user_input);
 
@@ -130,7 +130,7 @@ fn mongo_post(user_input: Json<Book_Shop>)->Result<Json<Book_Shop>,mongodb::erro
     
 }
 
-#[delete("/api/<id>")]
+#[delete("/<id>")]
 fn mongo_delete(id:i64)->Result<JsonValue,mongodb::error::Error>{
     println!("{}",id);
     match mongo_conection(&BOOK) {
@@ -143,7 +143,7 @@ fn mongo_delete(id:i64)->Result<JsonValue,mongodb::error::Error>{
     
 }
 
-#[put("/api/<id>",format="application/json", data ="<user_input>")]
+#[put("/<id>",format="application/json", data ="<user_input>")]
 fn mongo_put(id:i64,user_input:Json<Book_Shop>) ->Result<Json<Book_Shop>,mongodb::error::Error> {
         let new_data = doc!{
             "id":&user_input.id,
@@ -158,22 +158,11 @@ fn mongo_put(id:i64,user_input:Json<Book_Shop>) ->Result<Json<Book_Shop>,mongodb
         Err(e) => Err(e.into()),
     }
 }
-
-#[get("/")]
-fn index() ->Html<String>{
-    let html = format!("
-    
-    <h1>Hello Mongo</h1>
-
-
-    ");
-    Html(html)
-}
 fn main() {
     rocket().launch();
 }
 
 fn rocket()-> rocket::Rocket{
     rocket::ignite()
-    .mount("/", routes![index,mongo_get,mongo_post,mongo_delete,mongo_put]).attach(make_cors())
+    .mount("/", routes![mongo_get,mongo_post,mongo_delete,mongo_put]).attach(make_cors())
 }
