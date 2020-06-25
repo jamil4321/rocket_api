@@ -3,7 +3,6 @@
 #[macro_use] extern crate serde_derive;
 #[macro_use] extern crate rocket_contrib;
 extern crate rocket_cors;
-use rocket::response::content::Html;
 use rocket_contrib::json::{Json, JsonValue};
 use rocket::http::Method; 
 use rocket_cors::{
