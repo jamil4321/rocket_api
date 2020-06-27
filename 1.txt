@@ -26,8 +26,7 @@ Example:
 myname@mycomp:~/Documents/myrepo$
 Now write this command,
 
-heroku create mongor3api \
-  --buildpack https://github.com/emk/heroku-buildpack-rust.git
+heroku create rust-todo --buildpack https://github.com/emk/heroku-buildpack-rust.git
 Now, make these four files namely : Procfile, rust-toolchain, RustConfig, .travis.yml
 Procfile
 
